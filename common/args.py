@@ -19,16 +19,16 @@ class DataArgs:
         default="dataset/original",
         metadata={"help": "path to original data, containing a .tsv file and multiple directories"},
     )
-    common_path: str = field(
-        default="dataset/common/index.json",
+    common_data_path: str = field(
+        default="dataset/common/data.json",
         metadata={"help": "path to the data converted into a common form (a .json file)"},
     )
     common_image_dir: str = field(
         default="dataset/common/images",
         metadata={"help": "path to the data converted into a common form (the image dir)"},
     )
-    intern_path: str = field(default="dataset/intern.json")
-    qwen_path: str = field(default="dataset/qwen.json")
+    intern_path: str = field(default="dataset/intern")
+    qwen_path: str = field(default="dataset/qwen")
 
 
 @dataclass

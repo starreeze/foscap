@@ -42,11 +42,11 @@ def origin2common(args: DataArgs, _, __):
             image_attr["pixel/mm"] = 0.0
 
         desc_name = items[9].split(".")[0]
+        if not os.path.exists(os.path.join(args.common_image_dir, image_attr["image"])):
+            logger.warn(f"image {image_attr['image']} not found.")
+            continue
         if desc_name in data:
-            if os.path.exists(os.path.join(args.common_image_dir, image_attr["image"])):
-                data[desc_name]["images"].append(image_attr)
-            else:
-                logger.warn(f"image {image_attr['image']} not found.")
+            data[desc_name]["images"].append(image_attr)
         else:
             desc_file_path = os.path.join(args.common_image_dir, desc_name + ".txt")
             if os.path.exists(desc_file_path):
@@ -58,7 +58,7 @@ def origin2common(args: DataArgs, _, __):
                 }
             else:
                 logger.warn(f"desc {desc_name} not found.")
-    json.dump(data, open(args.common_path, "w"), indent=2)
+    json.dump(data, open(args.common_data_path, "w"), indent=2)
 
 
 def desc_filter(desc: str) -> str:
@@ -127,7 +127,7 @@ def image_filter(images_attrs: list[dict]) -> dict[str, str]:
 def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
     "convert to the format of InternLM-XComposer model, doing any preprocessing required and ready for training"
     data = []
-    common: dict[str, dict] = json.load(open(data_args.common_path))
+    common: dict[str, dict] = json.load(open(data_args.common_data_path))
     for i, sample in enumerate(common.values()):
         output_text = desc_filter(sample["desc"])
         if output_text == "":
@@ -139,11 +139,11 @@ def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
         data.append(
             {
                 "id": str(i),
-                "image": list(images.values()),
+                "image": list(map(lambda x: os.path.join(data_args.common_image_dir, x), images.values())),
                 "conversations": [{"from": "user", "value": input_text}, {"from": "assistant", "value": output_text}],
             }
         )
-    json.dump(data, open(data_args.intern_path, "w"), indent=2)
+    json.dump({"vl_data": data}, open(os.path.join(data_args.intern_path, "data.json"), "w"), indent=2)
     logger.info(f"{len(data)} / {len(common)} samples converted.")
 
 
