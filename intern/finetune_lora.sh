@@ -7,6 +7,8 @@ DIR=`pwd`
 export MODEL="internlm/internlm-xcomposer2-4khd-7b"
 export DATA="dataset/intern/data.json"
 export WANDB_MODE=offline
+export WANDB__SERVICE_WAIT=300
+export CUDA_HOME=/home/nfs04/cuda_tools/cuda-12.1
 
 GPUS_PER_NODE=3
 NNODES=1
@@ -33,7 +35,7 @@ python -m torch.distributed.run $DISTRIBUTED_ARGS intern/finetune.py \
     --fix_sampler True \
     --use_lora True \
     --output_dir ckpt/intern/lora \
-    --num_train_epochs 1 \
+    --num_train_epochs 2 \
     --batch_size 1 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \

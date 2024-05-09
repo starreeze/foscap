@@ -17,7 +17,7 @@ IGNORE_TOKEN_ID = LabelSmoother.ignore_index
 
 @dataclass
 class ModelArguments:
-    model_name_or_path: Optional[str] = field(default="")
+    model_name_or_path: str = field(default="")
 
 
 @dataclass
@@ -289,21 +289,6 @@ def train():
     trainer.save_state()
 
     safe_save_model_for_hf_trainer(trainer=trainer, output_dir=training_args.output_dir, bias=lora_args.lora_bias)
-
-
-# def eval():
-#     model_args, data_args, training_args, lora_args = parse_args()
-#     config, tokenizer = load_config_tokenizer(model_args, training_args)
-#     print(f"Load model from: {model_args.model_name_or_path}")
-#     model = AutoPeftModelForCausalLM.from_pretrained(
-#         model_args.model_name_or_path,
-#         trust_remote_code=True,
-#     ).cuda().eval()
-#     _, dataset, collator = load_data(data_args, tokenizer).values()
-#     dataloader = DataLoader(dataset, batch_size=training_args.per_device_eval_batch_size, collate_fn=collator)
-#     with open(os.path.join(training_args.output_dir, "eval_result.txt"), "w") as f:
-#         for batch in tqdm(dataloader):
-#             text, image = batch["samples"]["text_input"], batch["samples"]["image"]
 
 
 if __name__ == "__main__":
