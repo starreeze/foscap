@@ -17,16 +17,17 @@ IGNORE_TOKEN_ID = LabelSmoother.ignore_index
 
 @dataclass
 class ModelArguments:
-    model_name_or_path: str = field(default="")
+    model_name_or_path: str = field(default="internlm/internlm-xcomposer2-4khd-7b")
 
 
 @dataclass
 class DataArguments:
-    data_path: str = field(default="data.txt", metadata={"help": "Path to the training data."})
+    data_path: str = field(default="dataset/intern/data.json", metadata={"help": "Path to the training data."})
     given_num: bool = False
     img_size: int = 224
-    batch_size: int = 4
-    hd_num: int = -1
+    batch_size: int = 1
+    hd_num: int = 16
+    use_meta_inst: bool = False
     train_test_split: float = field(default=0.9)
     train_test_seed: int = field(default=0)
 
@@ -209,8 +210,7 @@ def parse_args() -> tuple[ModelArguments, DataArguments, TrainingArguments, Lora
     return model_args, data_args, training_args, lora_args
 
 
-def load_config_tokenizer(model_args, training_args):
-    # Set RoPE scaling factor
+def load_config(model_args, training_args):
     config = transformers.AutoConfig.from_pretrained(
         model_args.model_name_or_path,
         cache_dir=training_args.cache_dir,
@@ -218,15 +218,17 @@ def load_config_tokenizer(model_args, training_args):
     )
     config.use_cache = False
     config.max_length = training_args.max_length
+    return config
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(
+
+def load_tokenizer(model_args, training_args):
+    return transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
         cache_dir=training_args.cache_dir,
         padding_side="right",
         use_fast=False,
         trust_remote_code=True,
     )
-    return config, tokenizer
 
 
 def load_data(data_args, tokenizer):
@@ -238,7 +240,8 @@ def load_data(data_args, tokenizer):
 
 def train():
     model_args, data_args, training_args, lora_args = parse_args()
-    config, tokenizer = load_config_tokenizer(model_args, training_args)
+    config = load_config(model_args, training_args)
+    tokenizer = load_tokenizer(model_args, training_args)
 
     print(f"Load model from: {model_args.model_name_or_path}")
     model = transformers.AutoModelForCausalLM.from_pretrained(

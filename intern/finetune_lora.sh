@@ -10,7 +10,7 @@ export WANDB_MODE=offline
 export WANDB__SERVICE_WAIT=300
 export CUDA_HOME=/home/nfs04/cuda_tools/cuda-12.1
 
-GPUS_PER_NODE=3
+GPUS_PER_NODE=4
 NNODES=1
 NODE_RANK=0
 MASTER_ADDR=localhost
@@ -52,4 +52,4 @@ python -m torch.distributed.run $DISTRIBUTED_ARGS intern/finetune.py \
     --report_to "wandb" \
     --max_length 4096 \
     --deepspeed /home/nfs04/xingsy/foscap/intern/zero_2.json \
-    --gradient_checkpointing False
+    --gradient_checkpointing True
