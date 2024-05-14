@@ -40,8 +40,8 @@ class RunArgs:
 @dataclass
 class PromptArgs:
     task_desc: str = field(
-        default="The following paleontological fossil images are from a same specimen. "
-        "{images} Please describe the overall shape and pattern of the specimen."
+        default="The following paleontological fossil images are from a same specimen. {images} "
+        "Please give a brief description, including (but not limited to) the overall shape and pattern of the specimen."
     )
 
 

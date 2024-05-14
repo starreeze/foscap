@@ -86,7 +86,7 @@ def eval_intern():
             sample.pop("images")
             results.append(sample | {"response": response})
     os.makedirs(training_args.output_dir, exist_ok=True)
-    json.dump(results, open(os.path.join(training_args.output_dir + "eval_results.json"), "w"))
+    json.dump(results, open(os.path.join(training_args.output_dir, "eval_results.json"), "w"))
 
 
 if __name__ == "__main__":
