@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 # @Date    : 2024-04-21 15:22:29
 # @Author  : Shangyu.Xing (starreeze@foxmail.com)
+"data processing for [1 description: n images] format"
 
 from __future__ import annotations
 import os, json, re
 from typing import Any
 from common.args import DataArgs, RunArgs, PromptArgs, data_args, run_args, prompts, logger
+from data.utils import dump_files
 
 
 def origin2common(args: DataArgs, _, __):
@@ -13,19 +15,7 @@ def origin2common(args: DataArgs, _, __):
     Convert the given dataset to a more universal format.
     This will only do the conversion and filter out missing samples, without any processing.
     """
-    os.makedirs(args.common_image_dir, exist_ok=True)
-
-    # dump all files into one same dir
-    for desc_name in os.listdir(args.origin_path):
-        path = os.path.join(args.origin_path, desc_name)
-        if not os.path.isdir(path):
-            continue
-        path = os.path.join(path, "files")
-        for desc_name in os.listdir(path):
-            for file in os.listdir(os.path.join(path, desc_name)):
-                dst = os.path.join(args.common_image_dir, file)
-                if not os.path.exists(dst):
-                    os.link(os.path.join(path, desc_name, file), dst)
+    dump_files(args)
 
     # convert the table to json
     image_k_names = ["image", "figure_type", "specimen_type", "notes", "pixel/mm"]
@@ -43,7 +33,7 @@ def origin2common(args: DataArgs, _, __):
 
         desc_name = items[9].split(".")[0]
         if not os.path.exists(os.path.join(args.common_image_dir, image_attr["image"])):
-            logger.warn(f"image {image_attr['image']} not found.")
+            logger.warn(f"In line {i+1}: image {image_attr['image']} not found.")
             continue
         if desc_name in data:
             data[desc_name]["images"].append(image_attr)
@@ -57,7 +47,7 @@ def origin2common(args: DataArgs, _, __):
                     "images": [image_attr],
                 }
             else:
-                logger.warn(f"desc {desc_name} not found.")
+                logger.warn(f"In line {i+1}: description {desc_name} not found.")
     json.dump(data, open(args.common_data_path, "w"), indent=2)
 
 
@@ -135,7 +125,7 @@ def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
             continue
         images = image_filter(sample["images"])
         image_repr = "; ".join([f"This is a {k} image of the specimen: <ImageHere>" for k in images.keys()]) + "."
-        input_text = prompts.task_desc.format(images=image_repr)
+        input_text = prompts.desc_multi.format(images=image_repr)
         data.append(
             {
                 "id": str(i),
@@ -148,7 +138,7 @@ def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
 
 
 def main():
-    globals()[run_args.run_name](data_args, run_args, prompts)
+    globals()[run_args.task](data_args, run_args, prompts)
 
 
 if __name__ == "__main__":

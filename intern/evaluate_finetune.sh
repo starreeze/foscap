@@ -5,7 +5,7 @@ export CUDA_HOME=/home/nfs04/cuda_tools/cuda-12.1
 
 LR=$1
 
-python finetune/evaluate.py \
+python intern/evaluate.py \
     --model_name_or_path ckpt/intern/lora-$LR \
     --given_num True \
     --use_lora True \

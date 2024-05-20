@@ -3,7 +3,7 @@ PWD=`pwd`
 export PYTHONPATH=$PWD:$PWD/intern:$PYTHONPATH
 export CUDA_HOME=/home/nfs04/cuda_tools/cuda-12.1
 
-python finetune/evaluate.py \
+python intern/evaluate.py \
     --given_num True \
     --use_lora False \
     --output_dir eval/original \

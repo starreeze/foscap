@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from transformers import HfArgumentParser
 import logging
 from rich.logging import RichHandler
+from typing import cast
 
 logging.basicConfig(level="NOTSET", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("rich")
@@ -34,17 +35,23 @@ class DataArgs:
 @dataclass
 class RunArgs:
     action: str = field(default="")
-    run_name: str = field(default="")
+    task: str = field(default="")
 
 
 @dataclass
 class PromptArgs:
-    task_desc: str = field(
+    desc_multi: str = field(
         default="The following paleontological fossil images are from a same specimen. {images} "
         "Please give a brief description, including (but not limited to) the overall shape and pattern of the specimen."
+    )
+    desc_single: str = field(
+        default="The following is an image of a paleontological fossil. {image} " "Please give a detailed description."
     )
 
 
 data_args, run_args, prompts = HfArgumentParser(
-    [DataArgs, RunArgs, PromptArgs]  # type:ignore
+    [DataArgs, RunArgs, PromptArgs]  # type: ignore
 ).parse_args_into_dataclasses()
+data_args = cast(DataArgs, data_args)
+run_args = cast(RunArgs, run_args)
+prompts = cast(PromptArgs, prompts)
