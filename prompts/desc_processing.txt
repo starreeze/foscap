@@ -1,0 +1,9 @@
+The following is a description of a specimen. Please process the text in the following ways:
+1. correct its form and punctuations;
+2. remove all descriptions on tunnel angles and shell thickness, including their related information;
+3. if holotype is mentioned, its information is regarded as gold and other conflict descriptions are omitted; otherwise, replace all ranges with their mean values.
+Note that other than the above three rules, all other words should be kept as they are. Only reply the processed descriptions and do not include any explanations or comments in your reply.
+
+=== BEGIN DESCRIPTION ===
+{desc}
+=== END DESCRIPTION ===

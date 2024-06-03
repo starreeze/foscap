@@ -138,7 +138,7 @@ def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
 
 
 def main():
-    globals()[run_args.task](data_args, run_args, prompts)
+    globals()[run_args.action](data_args, run_args, prompts)
 
 
 if __name__ == "__main__":

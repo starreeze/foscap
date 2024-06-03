@@ -34,8 +34,8 @@ class DataArgs:
 
 @dataclass
 class RunArgs:
+    module: str = field(default="")
     action: str = field(default="")
-    task: str = field(default="")
 
 
 @dataclass
@@ -45,8 +45,9 @@ class PromptArgs:
         "Please give a brief description, including (but not limited to) the overall shape and pattern of the specimen."
     )
     desc_single: str = field(
-        default="The following is an image of a paleontological fossil. {image} " "Please give a detailed description."
+        default="The following is an image of a paleontological fossil. {image} Please give a detailed description."
     )
+    desc_processing: str = field(default=open("prompts/desc_processing.txt").read())
 
 
 data_args, run_args, prompts = HfArgumentParser(
