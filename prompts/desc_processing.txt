@@ -1,9 +1,11 @@
-The following is a description of a specimen. Please process the text in the following ways:
-1. correct its form and punctuations;
-2. remove all descriptions on tunnel angles and shell thickness, including their related information;
-3. if holotype is mentioned, its information is regarded as gold and other conflict descriptions are omitted; otherwise, replace all ranges with their mean values.
-Note that other than the above three rules, all other words should be kept as they are. Only reply the processed descriptions and do not include any explanations or comments in your reply.
+The following is a description of a paleontological spices. Please process the text in the following ways:
+1. translate to English if the original language is not English;
+2. correct its spelling and punctuations but do not change the expression;
+3. remove all descriptions regarding tunnel angles, thickness, proloculus/initial chamber, the number of septa and the number or size of volutions;
+4. convert the description of a spices into that of a typical specimen, by following the steps below:
+    (1) if holotype is mentioned, its information is regarded as gold and other conflict descriptions are omitted; otherwise, replace all ranges with their mean values;
+    (2) leave out words like "fully-grown specimen", "a typical specimen", "of a typical form", "holotype", "12 out of 14 specimens", etc. and come directly to the corresponding description, ensuring it is describing a specific specimen instead of the general spices;
+    (3) simply remove all the related description on the minority type, e.g., "paratype", "rarely seen", "1 out of 14 specimens".
+Note that other than the above rules, all other words should be kept as they are, so do not change the sentence and expression. Reply the processed descriptions only and do not include any explanations, comments, notes or additional symbols.
 
-=== BEGIN DESCRIPTION ===
 {desc}
-=== END DESCRIPTION ===

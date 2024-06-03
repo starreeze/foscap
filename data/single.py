@@ -5,9 +5,11 @@
 
 from __future__ import annotations
 import os, json, re
-from typing import Any
+from typing import Any, Callable
+from tqdm import tqdm
 from common.args import DataArgs, RunArgs, PromptArgs, data_args, run_args, prompts, logger
 from data.utils import dump_files
+from models.llm import get_generator
 
 
 def origin2common(args: DataArgs, _, __):
@@ -67,38 +69,31 @@ def sample_filter(samples: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return samples
 
 
-def desc_filter(desc: str, prompts: PromptArgs) -> str:
+def desc_processor(desc: str, prompts: PromptArgs, llm_generate: Callable[[str], str]) -> tuple[str, str]:
     """
-    Do some preprocessing on the description.
+    Do some preprocessing on the description and return the processed description and numerical info.
     """
-    inputs = prompts.desc_processing.format(desc=desc)
-    return desc
+    desc = llm_generate(prompts.desc_processing.format(desc=desc))
+    num_info = llm_generate(prompts.desc_extraction.format(desc=desc))
+    return desc, num_info
 
 
 def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
     "convert to the format of InternLM-XComposer model, doing any preprocessing required and ready for training"
-    data = []
+    generator = get_generator()
     common: dict[str, dict] = json.load(open(data_args.common_data_path))
-    total = 0
-    for i, specie in enumerate(common.values()):
+    data, total = [], 0
+    for i, specie in tqdm(enumerate(common.values()), total=len(common)):
+        desc, info = desc_processor(specie["desc"], prompts, generator)
+        inputs = prompts.desc_single.format(info=info)
         for sample in sample_filter(specie["images"]):
-            output_text = desc_filter(sample["desc"], prompts)
-            if output_text == "":
-                logger.warn(f'desc {sample["file_name"]}: {sample["desc"]} formatting failed, skipping.')
-                continue
-            image_attrs = []
-            for key in ["section_type", "specimen_type", "figure_type"]:
-                if sample[key] != "":
-                    image_attrs.append(sample["key"])
-            image_repr = f"This is a {', '.join(image_attrs)} image of the specimen: <ImageHere>."
-            input_text = prompts.desc_single.format(image=image_repr)
             data.append(
                 {
                     "id": str(i),
                     "image": os.path.join(data_args.common_image_dir, sample["image"]),
                     "conversations": [
-                        {"from": "user", "value": input_text},
-                        {"from": "assistant", "value": output_text},
+                        {"from": "user", "value": inputs},
+                        {"from": "assistant", "value": desc},
                     ],
                 }
             )

@@ -29,7 +29,15 @@ class DataArgs:
         metadata={"help": "path to the data converted into a common form (the image dir)"},
     )
     intern_path: str = field(default="dataset/intern")
-    qwen_path: str = field(default="dataset/qwen")
+    # qwen_path: str = field(default="dataset/qwen")
+
+
+@dataclass
+class ModelArgs:
+    llm_path: str = field(
+        default="meta-llama/Meta-Llama-3-8B",
+        metadata={"help": "path to the model to use"},
+    )
 
 
 @dataclass
@@ -45,14 +53,17 @@ class PromptArgs:
         "Please give a brief description, including (but not limited to) the overall shape and pattern of the specimen."
     )
     desc_single: str = field(
-        default="The following is an image of a paleontological fossil. {image} Please give a detailed description."
+        default="The following is an image of a paleontological fossil. <ImageHere> Please give a detailed description. "
+        "Here is some information on the overall shape that must be included in the description: {info}."
     )
     desc_processing: str = field(default=open("prompts/desc_processing.txt").read())
+    desc_extraction: str = field(default=open("prompts/desc_extraction.txt").read())
 
 
-data_args, run_args, prompts = HfArgumentParser(
-    [DataArgs, RunArgs, PromptArgs]  # type: ignore
+data_args, model_args, run_args, prompts = HfArgumentParser(
+    [DataArgs, ModelArgs, RunArgs, PromptArgs]  # type: ignore
 ).parse_args_into_dataclasses()
 data_args = cast(DataArgs, data_args)
+model_args = cast(ModelArgs, model_args)
 run_args = cast(RunArgs, run_args)
 prompts = cast(PromptArgs, prompts)
