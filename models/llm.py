@@ -12,7 +12,7 @@ def get_generator() -> Callable[[str], str]:
     pipeline = transformers.pipeline(
         "text-generation", model=model_args.llm_path, model_kwargs={"torch_dtype": torch.float16}, device_map="auto"
     )
-    return lambda x: pipeline(x)[0]["generated_text"][len(x) :]  # type: ignore
+    return lambda x: pipeline(x)[0]["generated_text"][len(x) :].strip()  # type: ignore
 
 
 def main():

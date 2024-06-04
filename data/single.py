@@ -98,6 +98,8 @@ def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
                 }
             )
         total += len(specie["images"])
+
+    os.makedirs(data_args.intern_path, exist_ok=True)
     json.dump({"vl_data": data}, open(os.path.join(data_args.intern_path, "data.json"), "w"), indent=2)
     logger.info(f"{len(data)} / {total} samples converted.")
 
