@@ -29,7 +29,8 @@ class DataArgs:
         metadata={"help": "path to the data converted into a common form (the image dir)"},
     )
     intern_path: str = field(default="dataset/intern")
-    # qwen_path: str = field(default="dataset/qwen")
+    desc_infer_bs: int = field(default=2, metadata={"help": "batch size for generating descriptions"})
+    info_infer_bs: int = field(default=3, metadata={"help": "batch size for generating numerics"})
 
 
 @dataclass
@@ -53,7 +54,8 @@ class PromptArgs:
         "Please give a brief description, including (but not limited to) the overall shape and pattern of the specimen."
     )
     desc_single: str = field(
-        default="The following is an image of a paleontological fossil. <ImageHere> Please give a detailed description. "
+        default="The following is an image of a paleontological fossil, belonging to spices {name}. "
+        "<ImageHere> Please give a detailed description. "
         "Here is some information on the overall shape that must be included in the description: {info}."
     )
     desc_processing: str = field(default=open("prompts/desc_processing.txt").read())
