@@ -114,7 +114,7 @@ def image_filter(images_attrs: list[dict]) -> dict[str, str]:
     return selected_images
 
 
-def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
+def common2intern(data_args: DataArgs, run_args: RunArgs, prompts):
     "convert to the format of InternLM-XComposer model, doing any preprocessing required and ready for training"
     data = []
     common: dict[str, dict] = json.load(open(data_args.common_data_path))
@@ -125,7 +125,7 @@ def common2intern(data_args: DataArgs, run_args: RunArgs, prompts: PromptArgs):
             continue
         images = image_filter(sample["images"])
         image_repr = "; ".join([f"This is a {k} image of the specimen: <ImageHere>" for k in images.keys()]) + "."
-        input_text = prompts.desc_multi.format(images=image_repr)
+        input_text = open(prompts.generation_multi).read().format(images=image_repr)
         data.append(
             {
                 "id": str(i),

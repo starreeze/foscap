@@ -1,0 +1,7 @@
+The following is a description of a paleontological spices. Please process the text in the following ways:
+{rule}
+Note that other than the above rules, all other words should be kept as they are, so do not change the sentence and expression. Your reply should only contain the processed descriptions directly, without any explanations, comments or notes.
+
+ORIGINAL: {desc}
+
+PROCESSED: 

@@ -3,11 +3,11 @@
 # @Author  : Shangyu.Xing (starreeze@foxmail.com)
 
 from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, make_dataclass
 from transformers import HfArgumentParser
-import logging
+import logging, os
 from rich.logging import RichHandler
-from typing import cast
+from typing import Any, cast, Annotated, NewType
 
 logging.basicConfig(level="NOTSET", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("rich")
@@ -31,6 +31,7 @@ class DataArgs:
     intern_path: str = field(default="dataset/intern")
     desc_infer_bs: int = field(default=2, metadata={"help": "batch size for generating descriptions"})
     info_infer_bs: int = field(default=3, metadata={"help": "batch size for generating numerics"})
+    end_pos: int = field(default=int(1e9), metadata={"help": "the end position of the data"})
 
 
 @dataclass
@@ -47,25 +48,18 @@ class RunArgs:
     action: str = field(default="")
 
 
-@dataclass
-class PromptArgs:
-    desc_multi: str = field(
-        default="The following paleontological fossil images are from a same specimen. {images} "
-        "Please give a brief description, including (but not limited to) the overall shape and pattern of the specimen."
-    )
-    desc_single: str = field(
-        default="The following is an image of a paleontological fossil, belonging to spices {name}. "
-        "<ImageHere> Please give a detailed description. "
-        "Here is some information on the overall shape that must be included in the description: {info}."
-    )
-    desc_processing: str = field(default=open("prompts/desc_processing.txt").read())
-    desc_extraction: str = field(default=open("prompts/desc_extraction.txt").read())
+def create_prompt_args():
+    prompt_files = ["desc_extraction", "desc_processing_tmpl", "generation_multi", "generation_single"]
+    fields: list[tuple[str, Any, Any]] = [(name, str, field(default=f"prompts/{name}.txt")) for name in prompt_files]
+    rule_files = [f"prompts/{name}" for name in os.listdir("prompts") if name.startswith("desc_processing_rule")]
+    fields.append(("desc_processing_rules", list[str], field(default_factory=lambda: rule_files)))
+    return make_dataclass("PromptArgs", fields)
 
 
+PromptArgs = create_prompt_args()
 data_args, model_args, run_args, prompts = HfArgumentParser(
     [DataArgs, ModelArgs, RunArgs, PromptArgs]  # type: ignore
 ).parse_args_into_dataclasses()
 data_args = cast(DataArgs, data_args)
 model_args = cast(ModelArgs, model_args)
 run_args = cast(RunArgs, run_args)
-prompts = cast(PromptArgs, prompts)

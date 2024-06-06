@@ -1,0 +1,2 @@
+The following paleontological fossil images are from a same specimen. {images}
+Please give a brief description, including (but not limited to) the overall shape and pattern of the specimen.

@@ -1,0 +1,2 @@
+The following is an image of a paleontological fossil, belonging to spices {name}. <ImageHere>
+Please give a detailed description. Here is some information on the overall shape that must be included in the description: {info}.

@@ -70,11 +70,18 @@ def sample_filter(samples: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def desc_processor(descs: list[str]) -> tuple[list[str], list[str]]:
     "Do some preprocessing on the description and return the processed description and numerical info."
     llm_generator = LLMGenerator()
-    descs = llm_generator(
-        [prompts.desc_processing.format(desc=desc) for desc in descs], batch_size=data_args.desc_infer_bs
-    )
+    prompt_processing_tmpl = open(prompts.desc_processing_tmpl).read()
+    for rule_file in prompts.desc_processing_rules:
+        rule = open(rule_file).read().strip()
+        descs = llm_generator(
+            [prompt_processing_tmpl.format(rule=rule, desc=desc) for desc in descs],
+            batch_size=data_args.desc_infer_bs,
+        )
+
+    prompt_extraction = open(prompts.desc_extraction).read()
     num_info = llm_generator(
-        [prompts.desc_processing.format(desc=desc) for desc in descs], batch_size=data_args.info_infer_bs
+        [prompt_extraction.format(desc=desc) for desc in descs],
+        batch_size=data_args.info_infer_bs,
     )
     return descs, num_info
 
@@ -83,12 +90,12 @@ def common2intern():
     "convert to the format of InternLM-XComposer model, doing any preprocessing required and ready for training"
     common: dict[str, dict] = json.load(open(data_args.common_data_path))
     # sort by length for efficient batching in llm inference, longest first for detecting OOM
-    species = sorted(common.values(), key=lambda x: len(x["desc"]), reverse=True)
+    species = sorted(common.values(), key=lambda x: len(x["desc"]), reverse=True)[: data_args.end_pos]
     descs = [specie["desc"] for specie in species]
     descs, numerics = desc_processor(descs)
     data, total = [], 0
     for i, (specie, desc, numeric) in enumerate(zip(species, descs, numerics)):
-        inputs = prompts.desc_single.format(info=numeric, name=specie["name"])
+        inputs = open(prompts.generation_single).read().format(info=numeric, name=specie["name"])
         for sample in sample_filter(specie["images"]):
             data.append(
                 {
