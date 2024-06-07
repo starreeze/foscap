@@ -3,9 +3,9 @@ The following is a description of a paleontological spices. Please extract the i
 2. diameter (width)
 3. form ratio (axial ratio)
 Reply in format like: `2.2mm in length, 1.0mm in diameter, form ratio 2.2.`
-If some information is not found, just skip it and reply with other existent information. If none can be found, reply with `None.`
-Your reply should only contain the direct answer , without any explanations or comments.
+**If some information is not found, just skip it and reply with other existent information. If none can be found, reply with `None.`**
+Your reply should only contain the direct answer, without any explanations or comments.
 
 DESCRIPTION: {desc}
 
-SHAPE INFO: 
+ANSWER: 

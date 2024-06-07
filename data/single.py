@@ -93,20 +93,21 @@ def common2intern():
     species = sorted(common.values(), key=lambda x: len(x["desc"]), reverse=True)[: data_args.end_pos]
     descs = [specie["desc"] for specie in species]
     descs, numerics = desc_processor(descs)
-    data, total = [], 0
-    for i, (specie, desc, numeric) in enumerate(zip(species, descs, numerics)):
+    data, total, i = [], 0, 0
+    for specie, desc, numeric in zip(species, descs, numerics):
         inputs = open(prompts.generation_single).read().format(info=numeric, name=specie["name"])
         for sample in sample_filter(specie["images"]):
             data.append(
                 {
                     "id": str(i),
-                    "image": os.path.join(data_args.common_image_dir, sample["image"]),
+                    "image": [os.path.join(data_args.common_image_dir, sample["image"])],
                     "conversations": [
                         {"from": "user", "value": inputs},
                         {"from": "assistant", "value": desc},
                     ],
                 }
             )
+            i += 1
         total += len(specie["images"])
 
     os.makedirs(data_args.intern_path, exist_ok=True)
