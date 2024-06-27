@@ -57,14 +57,14 @@ def origin2common():
                 }
             else:
                 logger.warn(f"In line {i+1}: description {desc_name} not found.")
-    json.dump(data, open(data_args.common_data_path, "w"), indent=2)
+    json.dump(data, open(os.path.join(data_args.common_text_dir, "data.json"), "w"), indent=2)
 
 
 def sample_filter(samples: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Filter out samples that are not useful for training.
     """
-    return samples
+    return samples[0:1]
 
 
 def desc_processor(descs: list[str]) -> tuple[list[str], list[str]]:
@@ -86,24 +86,36 @@ def desc_processor(descs: list[str]) -> tuple[list[str], list[str]]:
     return descs, num_info
 
 
-def common2intern():
-    "convert to the format of InternLM-XComposer model, doing any preprocessing required and ready for training"
-    common: dict[str, dict] = json.load(open(data_args.common_data_path))
+def format_common():
+    "format desc to input and output, doing any preprocessing required and ready for training"
+    data: dict[str, dict] = json.load(open(os.path.join(data_args.common_text_dir, "data.json")))
     # sort by length for efficient batching in llm inference, longest first for detecting OOM
-    species = sorted(common.values(), key=lambda x: len(x["desc"]), reverse=True)[: data_args.end_pos]
-    descs = [specie["desc"] for specie in species]
+    data_items = sorted(list(data.items())[: data_args.end_pos], key=lambda x: len(x[1]["desc"]), reverse=True)
+    descs = [data_item[1]["desc"] for data_item in data_items]
     descs, numerics = desc_processor(descs)
+    instruct: dict[str, dict] = {}
+    for (name, specie), desc, numeric in zip(data_items, descs, numerics):
+        instruct[name] = dict(
+            input=open(prompts.generation_single).read().format(info=numeric, name=specie["name"]),
+            output=desc,
+            images=specie["images"],
+        )
+    json.dump(instruct, open(os.path.join(data_args.common_text_dir, "instruct.json"), "w"), indent=2)
+
+
+def common2intern():
+    "convert to the format of InternLM-XComposer model"
+    common: dict[str, dict] = json.load(open(os.path.join(data_args.common_text_dir, "instruct.json")))
     data, total, i = [], 0, 0
-    for specie, desc, numeric in zip(species, descs, numerics):
-        inputs = open(prompts.generation_single).read().format(info=numeric, name=specie["name"])
+    for specie in common.values():
         for sample in sample_filter(specie["images"]):
             data.append(
                 {
                     "id": str(i),
                     "image": [os.path.join(data_args.common_image_dir, sample["image"])],
                     "conversations": [
-                        {"from": "user", "value": inputs},
-                        {"from": "assistant", "value": desc},
+                        {"from": "user", "value": specie["input"]},
+                        {"from": "assistant", "value": specie["output"]},
                     ],
                 }
             )

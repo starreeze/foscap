@@ -28,7 +28,7 @@ class DataArguments:
     batch_size: int = 1
     hd_num: int = 16
     use_meta_inst: bool = False
-    train_test_split: float = field(default=0.9)
+    train_test_split: float = field(default=0.99)
     train_test_seed: int = field(default=0)
 
 
@@ -286,6 +286,9 @@ def train():
             model.enable_input_require_grads()
 
     data_module = load_data(data_args, model.tokenizer)
+    # dataloader = DataLoader(data_module["train_dataset"], batch_size=1, collate_fn=data_module["data_collator"])
+    # model(**next(iter(dataloader)))["input_ids"]
+
     trainer = Trainer(model=model, tokenizer=model.tokenizer, args=training_args, **data_module)
 
     trainer.train()

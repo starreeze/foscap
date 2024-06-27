@@ -3,11 +3,15 @@
 # @Author  : Shangyu.Xing (starreeze@foxmail.com)
 
 from __future__ import annotations
+from io import TextIOWrapper
 import os, torch, json
+from typing import Any
+from copy import deepcopy
 from torch.utils.data import DataLoader, Dataset, random_split
 from PIL import Image
 from tqdm import tqdm
 from common.utils import to_device
+from common.iterwrap import iterate_wrapper
 from transformers import AutoModelForCausalLM
 from peft.auto import AutoPeftModelForCausalLM
 
@@ -69,6 +73,22 @@ def eval_intern():
 
     torch.set_grad_enabled(False)
     kwargs = {} if data_args.use_meta_inst else dict(meta_instruction="")
+
+    # def infer_sample(out_f: TextIOWrapper, sample: dict[str, Any], vars: dict[str, Any]):
+    #     s: dict[str, Any] = to_device(sample)  # type: ignore
+    #     with torch.cuda.amp.autocast():  # type: ignore
+    #         response, _ = model.chat(
+    #             tokenizer,
+    #             query=s["text"],
+    #             image=s["images"],
+    #             hd_num=data_args.hd_num,
+    #             history=[],
+    #             do_sample=False,
+    #             num_beams=3,
+    #             **kwargs,
+    #         )
+    #     out_f.write("\n".join([f'QUERY: {s["text"]}', f'ANSWER: {s["answer"]}', f"RESPONSE: {response}", "\n"]))
+
     results = []
     for sample in tqdm(loader):
         sample: dict = to_device(sample)  # type: ignore
@@ -87,6 +107,14 @@ def eval_intern():
             results.append(sample | {"response": response})
     os.makedirs(training_args.output_dir, exist_ok=True)
     json.dump(results, open(os.path.join(training_args.output_dir, "eval_results.json"), "w"))
+    # iterate_wrapper(
+    #     infer_sample,
+    #     loader,
+    #     os.path.join(training_args.output_dir, "eval_results.txt"),
+    #     num_workers=len(training_args.cuda_devices),
+    #     envs=[{"GPUID": d} for d in training_args.cuda_devices],
+    #     vars_factory=vars_factory,
+    # )
 
 
 if __name__ == "__main__":

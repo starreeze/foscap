@@ -48,7 +48,7 @@ def origin2common(args: DataArgs, _, __):
                 }
             else:
                 logger.warn(f"In line {i+1}: description {desc_name} not found.")
-    json.dump(data, open(args.common_data_path, "w"), indent=2)
+    json.dump(data, open(args.common_text_dir, "w"), indent=2)
 
 
 def desc_filter(desc: str) -> str:
@@ -117,7 +117,7 @@ def image_filter(images_attrs: list[dict]) -> dict[str, str]:
 def common2intern(data_args: DataArgs, run_args: RunArgs, prompts):
     "convert to the format of InternLM-XComposer model, doing any preprocessing required and ready for training"
     data = []
-    common: dict[str, dict] = json.load(open(data_args.common_data_path))
+    common: dict[str, dict] = json.load(open(data_args.common_text_dir))
     for i, sample in enumerate(common.values()):
         output_text = desc_filter(sample["desc"])
         if output_text == "":

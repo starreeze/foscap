@@ -7,7 +7,7 @@ from dataclasses import dataclass, field, make_dataclass
 from transformers import HfArgumentParser
 import logging, os
 from rich.logging import RichHandler
-from typing import Any, cast, Annotated, NewType
+from typing import Any, cast
 
 logging.basicConfig(level="NOTSET", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()])
 logger = logging.getLogger("rich")
@@ -20,9 +20,9 @@ class DataArgs:
         default="dataset/original",
         metadata={"help": "path to original data, containing a .tsv file and multiple directories"},
     )
-    common_data_path: str = field(
-        default="dataset/common/data.json",
-        metadata={"help": "path to the data converted into a common form (a .json file)"},
+    common_text_dir: str = field(
+        default="dataset/common",
+        metadata={"help": "path to the data converted into a common form (the text dir)"},
     )
     common_image_dir: str = field(
         default="dataset/common/images",
